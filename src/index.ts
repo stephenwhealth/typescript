@@ -5,6 +5,7 @@ import cookieparser from "cookie-parser";
 import compression from "compression";
 import cors from "cors";
 import mongoose from "mongoose"
+import router from './router'
 
 const app = express();
 
@@ -23,9 +24,11 @@ app.use(cookieparser());
 // is an Express middleware that tells your server to read JSON data sent in the request body.
 app.use(bodypaser.json());
 
+app.use('/', router());
+
 const server = http.createServer(app)
 
-server.listen(4040, ()=>{
+server.listen(8000, ()=>{
     console.log('welcome to lagos');
 });
 

@@ -29,7 +29,7 @@ const UserSchema = new mongoose.Schema({
 })
 
 
-export const Usermodel = mongoose.model('user', UserSchema);
+export const Usermodel = mongoose.model('typescriptuser', UserSchema);
 
 
 export const getUsers = () => Usermodel.find();
