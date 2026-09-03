@@ -1,6 +1,6 @@
 import express from "express";
 
-import { random, authentication } from "../helpers/index"
+import { random, authentication } from "../helpers"
 
 import { getUserByEmail, createUser } from "../db/users";
 
@@ -44,21 +44,46 @@ export const registerfile = async (req: express.Request, res: express.Response) 
 
 export const loginuser = async (req: express.Request, res: express.Response) => {
 
-    const { email, password } = req.body;
+    try {
+        const { email, password } = req.body;
 
     if(!email || !password) {
         return res.status(400).json('email and password needed to login')
     }
 
-    const find = await getUserByEmail(email)
+    const user = await getUserByEmail(email).select('+authentication.salt +authentication.password')
 
-    if(!find) {
+    if(!user) {
         return res.status(400).json('user does not exist')
     }
 
+    if (!user.authentication || !user.authentication.salt || !user.authentication.password) {
+        return res.status(400).json({
+            message: "User authentication data is missing"
+    });
+}
+
+    const expectedHash = authentication(user.authentication.salt, password);
+
+    if(user.authentication.password !== expectedHash){
+        return res.sendStatus(403);
+    }
+
+    const salt = random();
+    user.authentication.sessionToken = authentication(salt, user._id.toString());
+
+    await user.save();
+
+    res.cookie('STEPHEN-AUTH', user.authentication.sessionToken, { domain: 'localhost', path: '/'});
+
     return res.status(200).json({
        message: 'user loggin successfully',
-       data: find 
+       data: user 
     })
+
+    }catch(error){
+        console.log(error)
+        return res.sendStatus(400)
+    }
 
 }
