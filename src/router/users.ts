@@ -1,8 +1,10 @@
 import express from 'express';
 
-import { getAllUsers, getuserid} from "../controllers/users"
+import { getAllUsers, getuserid, deleteuser} from "../controllers/users"
+import {isAuthenticated} from "../middlewares/index"
 
 export default(router: express.Router) => {
-    router.get('/auth/users', getAllUsers);
-    router.get('/auth/user/:id', getuserid)
+    router.get('/auth/users', isAuthenticated, getAllUsers);
+    router.get('/auth/user/:id', getuserid);
+    router.delete('/auth/user/:id', deleteuser)
 }

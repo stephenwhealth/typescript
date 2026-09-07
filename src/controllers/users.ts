@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { getUsers, getUserById } from '../db/users';
+import { getUsers, getUserById, deleteUserById } from '../db/users';
 
 export const getAllUsers = async (req: express.Request, res: express.Response) => {
     try{
@@ -48,4 +48,30 @@ export const getuserid = async (req: express.Request, res: express.Response) => 
         console.log(error);
         return res.sendStatus(500);
     }
+}
+
+export const deleteuser = async (req: express.Request, res: express.Response) => {
+    try {
+        const {id} = req.params;
+
+        if(typeof id !== 'string'){
+            return res.status(400).json({ message: "Invalid user id" })
+        }
+
+        const deleteone = await deleteUserById(id)
+
+        if(!deleteone) {
+            return res.status(400).json('id not found')
+        }
+
+        res.status(200).json({
+            message: 'deleted successfully', 
+            data: deleteone
+        })
+
+    }catch(error) {
+        console.log(error);
+        return res.sendStatus(403)
+    }
+
 }
