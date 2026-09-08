@@ -28,7 +28,7 @@ app.use('/', router());
 
 const server = http.createServer(app)
 
-server.listen(8000, ()=>{
+server.listen(8080, ()=>{
     console.log('welcome to lagos');
 });
 

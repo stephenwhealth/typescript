@@ -2,6 +2,9 @@ import express from 'express';
 
 import { getUsers, getUserById, deleteUserById } from '../db/users';
 
+
+// getting all users
+
 export const getAllUsers = async (req: express.Request, res: express.Response) => {
     try{
 
@@ -25,6 +28,8 @@ export const getAllUsers = async (req: express.Request, res: express.Response) =
 
 }
 
+
+// getting a user by id
 
 export const getuserid = async (req: express.Request, res: express.Response) => {
     try{
@@ -50,9 +55,13 @@ export const getuserid = async (req: express.Request, res: express.Response) => 
     }
 }
 
+
+// deleting a user
+
 export const deleteuser = async (req: express.Request, res: express.Response) => {
     try {
         const {id} = req.params;
+        
 
         if(typeof id !== 'string'){
             return res.status(400).json({ message: "Invalid user id" })
@@ -74,4 +83,37 @@ export const deleteuser = async (req: express.Request, res: express.Response) =>
         return res.sendStatus(403)
     }
 
+}
+
+// updating a username of a particular user
+
+export const updateuser = async (req: express.Request, res: express.Response) => {
+    try{
+
+        const {id} = req.params;
+
+        if(typeof id !== 'string'){
+            return res.status(400).json({ message: "Invalid user id" })
+        }
+
+        const available  = await getUserById(id)
+
+        if(!available) {
+            return res.status(400).json('user is not available on the database')
+        }
+
+        const {username} = req.body
+
+        available.username = username
+        await available.save();
+
+        return res.status(200).json({
+            message: 'username updated successfully',
+            info: available
+        })
+
+    }catch (error) {
+        console.log(error);
+        return res.sendStatus(400);
+    }
 }
