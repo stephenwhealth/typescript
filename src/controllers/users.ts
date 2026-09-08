@@ -1,6 +1,9 @@
 import express from 'express';
 
-import { getUsers, getUserById, deleteUserById } from '../db/users';
+import { random, authentication } from "../helpers"
+
+import { getUsers, getUserById, deleteUserById, updateUserById } from '../db/users';
+import { ReturnDocument } from 'mongodb';
 
 
 // getting all users
@@ -87,7 +90,7 @@ export const deleteuser = async (req: express.Request, res: express.Response) =>
 
 // updating a username of a particular user
 
-export const updateuser = async (req: express.Request, res: express.Response) => {
+export const updateduser = async (req: express.Request, res: express.Response) => {
     try{
 
         const {id} = req.params;
@@ -110,6 +113,56 @@ export const updateuser = async (req: express.Request, res: express.Response) =>
         return res.status(200).json({
             message: 'username updated successfully',
             info: available
+        })
+
+    }catch (error) {
+        console.log(error);
+        return res.sendStatus(400);
+    }
+}
+
+// OR update the full info or just a password
+
+export const updateuser = async (req: express.Request, res: express.Response) => {
+    try{
+
+        const {id} = req.params;
+
+        if(typeof id !== 'string'){
+            return res.status(400).json({ message: "Invalid user id" })
+        }
+
+        const available  = await getUserById(id).select('+authentication.password +authentication.salt')
+
+
+        if(!available) {
+            return res.status(400).json('user is not available on the database')
+        }
+
+        const {username, email, password} = req.body
+
+        
+        const newprofile: any = {
+            username: username ?? available.username,
+            email: email ?? available.email
+        }
+
+        // change password if the password is included
+        if (password) {
+            const salt = random();
+
+            newprofile.authentication = {
+                salt,
+                password: authentication(salt, password)
+            };
+        }
+
+   
+        const updated = await updateUserById(id, newprofile, {returnDocument: 'after'})
+
+        return res.status(200).json({
+            message: 'you successfully updated your profile',
+            info: updated
         })
 
     }catch (error) {
