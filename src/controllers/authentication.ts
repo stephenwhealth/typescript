@@ -87,3 +87,22 @@ export const loginuser = async (req: express.Request, res: express.Response) => 
     }
 
 }
+
+
+export const logout = async (req: express.Request, res: express.Response) => {
+    try{
+
+        res.clearCookie('STEPHEN-AUTH', {
+            domain: 'localhost',
+            path: '/'
+        });
+
+        return res.status(200).json({
+            message: 'User logged out successfully'
+        });
+
+    }catch (error) {
+        console.log(error);
+        return res.status(500).json('internal error');
+    }
+}
